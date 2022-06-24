@@ -1,7 +1,10 @@
 ---
 name: Checks
 
-on: [ push ]
+on:
+  push:
+    tags-ignore:
+      - no-test
 
 env:
   DB_NAME: "dbname"
@@ -9,6 +12,7 @@ env:
   DB_PASS: "changeMe"
   DJANGO_SECRET_KEY: "changeMe"
   DJANGO_ALLOWED_HOSTS: "*"
+  DJANGO_DEBUG: 1
 
 jobs:
   test-lint:
