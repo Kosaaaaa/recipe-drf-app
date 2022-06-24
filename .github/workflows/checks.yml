@@ -4,11 +4,11 @@ name: Checks
 on: [ push ]
 
 env:
-  DB_NAME: dbname
-  DB_USER: rootuser
-  DB_PASS: changeMe
-  DJANGO_SECRET_KEY: changeMe
-  DJANGO_ALLOWED_HOSTS: *
+  DB_NAME: "dbname"
+  DB_USER: "rootuser"
+  DB_PASS: "changeMe"
+  DJANGO_SECRET_KEY: "changeMe"
+  DJANGO_ALLOWED_HOSTS: "*"
 
 jobs:
   test-lint:
