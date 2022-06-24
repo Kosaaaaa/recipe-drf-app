@@ -1,10 +1,12 @@
 ---
 name: Checks
 
-on:
-  push:
-    tags-ignore:
-      - no-test
+#on:
+#  push:
+#    tags-ignore:
+#      - no-test
+
+on: [ push ]
 
 env:
   DB_NAME: "dbname"
