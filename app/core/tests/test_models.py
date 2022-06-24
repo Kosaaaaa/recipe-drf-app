@@ -44,7 +44,7 @@ class UserModelTests(TestCase):
 
     def test_new_user_without_email_raises_error(self):
         """Test that creating a user without an email raises a ValueError."""
-        with self.assertRaises(ValueError):
+        with self.assertRaisesRegex(ValueError, r'email'):
             get_user_model().objects.create_user('', 'test123')
 
     def test_create_superuser(self):
@@ -57,15 +57,20 @@ class UserModelTests(TestCase):
         self.assertTrue(user.is_superuser)
         self.assertTrue(user.is_staff)
 
+    def test_create_user_with_falsy_password(self):
+        """Test creating user with falsy password"""
+        email = 'test@example.com'
+
+        for password in (None, False, 0, ''):
+            with self.assertRaisesRegex(ValueError, r'password'):
+                get_user_model().objects.create_user(email, password)
+
 
 class CommonModelTests(TestCase):
 
     def test_create_recipe(self):
         """Test creating a recipe is successful."""
-        user = get_user_model().objects.create_user(
-            'test@example.com',
-            'testPass123',
-        )
+        user = create_user()
         recipe = models.Recipe.objects.create(
             user=user,
             title='Sample recipe name',
