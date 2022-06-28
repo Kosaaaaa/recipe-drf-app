@@ -11,18 +11,24 @@ EXPOSE 8000
 
 ARG DEV=false
 
+# create python virtualenv, upgrade pip, install required linux and python packages
 RUN python -m venv /py && \
     /py/bin/pip install --upgrade pip && \
-    apk add --update --no-cache postgresql-client jpeg-dev && \
+    apk add --update --no-cache postgresql-client jpeg-dev libstdc++ && \
     apk add --update --no-cache --virtual .tmp-build-deps \
-        build-base postgresql-dev musl-dev zlib zlib-dev linux-headers && \
+        build-base postgresql-dev musl-dev zlib zlib-dev linux-headers g++ && \
+    ln -s /usr/include/locale.h /usr/include/xlocale.h && \
     /py/bin/pip install -r /tmp/requirements.txt && \
     if [ $DEV = "true" ]; \
         then /py/bin/pip install -r /tmp/requirements.dev.txt ; \
-    fi && \
-    rm -rf /tmp && \
-    apk del .tmp-build-deps && \
-    adduser \
+    fi
+
+# clean tmp resoursces
+RUN rm -rf /tmp && \
+    apk del .tmp-build-deps
+
+# create user and create static and media directories with privilages - django-user : read, write, execute
+RUN adduser \
         --disabled-password \
         --no-create-home \
         django-user && \
