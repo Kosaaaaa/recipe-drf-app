@@ -1,10 +1,7 @@
 ---
 name: Checks
 
-on:
-  push:
-    tags:
-      - test-it
+on: [ push ]
 
 env:
   DB_NAME: "dbname"
