@@ -94,7 +94,7 @@ class PrivateIngredientsApiTests(TestCase):
         self.assertFalse(ingredients.exists())
 
     def test_filter_ingredients_assigned_to_recipes(self):
-        """Test listing ingedients to those assigned to recipes."""
+        """Test listing ingredients to those assigned to recipes."""
         in1 = Ingredient.objects.create(user=self.user, name='Apples')
         in2 = Ingredient.objects.create(user=self.user, name='Turkey')
         recipe = Recipe.objects.create(
@@ -134,3 +134,16 @@ class PrivateIngredientsApiTests(TestCase):
         res = self.client.get(INGREDIENTS_URL, {'assigned_only': 1})
 
         self.assertEqual(len(res.data), 1)
+
+    def test_create_ingredient(self):
+        """Test creating an ingredient."""
+        payload = {
+            'name': 'Ingredient1',
+        }
+        res = self.client.post(INGREDIENTS_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        ingredient = Ingredient.objects.get(id=res.data['id'])
+        for k, v in payload.items():
+            self.assertEqual(getattr(ingredient, k), v)
+        self.assertEqual(ingredient.user, self.user)

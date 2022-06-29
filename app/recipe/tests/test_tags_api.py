@@ -1,7 +1,6 @@
 """
 Tests for the tags API.
 """
-
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
@@ -92,3 +91,16 @@ class PrivateTagsApiTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
         tags = Tag.objects.filter(user=self.user)
         self.assertFalse(tags.exists())
+
+    def test_create_tag(self):
+        """Test creating a tag."""
+        payload = {
+            'name': 'Tag1',
+        }
+        res = self.client.post(TAGS_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        tag = Tag.objects.get(id=res.data['id'])
+        for k, v in payload.items():
+            self.assertEqual(getattr(tag, k), v)
+        self.assertEqual(tag.user, self.user)

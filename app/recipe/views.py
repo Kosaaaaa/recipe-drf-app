@@ -3,7 +3,8 @@ Views for the recipe APIs
 """
 
 from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiParameter, OpenApiTypes
-from rest_framework import viewsets, mixins, status
+from rest_framework import mixins, status
+from rest_framework import viewsets, serializers
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -97,10 +98,15 @@ class RecipeViewSet(viewsets.ModelViewSet):
 class BaseRecipeAttrViewSet(mixins.DestroyModelMixin,
                             mixins.UpdateModelMixin,
                             mixins.ListModelMixin,
+                            mixins.CreateModelMixin,
                             viewsets.GenericViewSet):
     """Base ViewSet for recipe attributes."""
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        """Create a new model instance with user from request."""
+        serializer.save(user=self.request.user)
 
     def get_queryset(self):
         """Filter queryset to authenticated user."""
