@@ -8,6 +8,7 @@ import uuid
 from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 
 def recipe_image_file_path(instance, filename):
@@ -71,6 +72,11 @@ class Recipe(models.Model):
     def __str__(self):
         return self.title
 
+    class Meta:
+        verbose_name = _('Recipe')
+        verbose_name_plural = _('Recipes')
+        ordering = ['-id']
+
 
 class Tag(models.Model):
     """Tag for filtering recipes."""
@@ -80,6 +86,11 @@ class Tag(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        verbose_name = _('Tag')
+        verbose_name_plural = _('Tags')
+        ordering = ['-name']
+
 
 class Ingredient(models.Model):
     """Ingredient for recipes."""
@@ -88,3 +99,8 @@ class Ingredient(models.Model):
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        verbose_name = _('Ingredient')
+        verbose_name_plural = _('Ingredients')
+        ordering = ['-name']
