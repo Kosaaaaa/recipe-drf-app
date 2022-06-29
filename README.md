@@ -1,4 +1,5 @@
 # recipe-drf-app
+[![Checks](https://github.com/Kosaaaaa/recipe-drf-app/actions/workflows/checks.yml/badge.svg)](https://github.com/Kosaaaaa/recipe-drf-app/actions/workflows/checks.yml)
 
 Cooking Recipe Backend App created with Django Rest Framework
 
