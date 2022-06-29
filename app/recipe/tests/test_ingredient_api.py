@@ -20,7 +20,7 @@ def detail_url(ingredient_id):
     return reverse('recipe:ingredient-detail', args=[ingredient_id])
 
 
-def create_user(email='user@example.com', password='testpass123'):
+def create_user(email='user@example.com', password='testPass123'):
     """Create and return user."""
     return get_user_model().objects.create_user(email=email, password=password)
 
@@ -159,6 +159,22 @@ class PrivateIngredientsApiTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.headers['Content-Disposition'], 'attachment; filename=testfile.csv')
         self.assertEqual(res.headers['Content-Type'], 'text/csv; charset=utf-8')
+
+        for ingredient, row in zip(ingredients, res.data):
+            for k, v in row.items():
+                self.assertEqual(getattr(ingredient, k), v)
+
+    def test_list_tag_xlsx(self):
+
+        Ingredient.objects.create(user=self.user, name='Eggs'),
+        Ingredient.objects.create(user=self.user, name='Milk')
+
+        ingredients = Ingredient.objects.all().order_by('-name').distinct()
+
+        res = self.client.get(INGREDIENTS_URL, {'format': 'xlsx', 'filename': 'testfile'})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.headers['Content-Disposition'], 'attachment; filename=testfile.xlsx')
+        self.assertEqual(res.headers['Content-Type'], 'application/xlsx; charset=utf-8')
 
         for ingredient, row in zip(ingredients, res.data):
             for k, v in row.items():

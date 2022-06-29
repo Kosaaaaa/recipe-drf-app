@@ -120,3 +120,18 @@ class PrivateTagsApiTests(TestCase):
         for tag, row in zip(tags, res.data):
             for k, v in row.items():
                 self.assertEqual(getattr(tag, k), v)
+
+    def test_list_tag_xlsx(self):
+        Tag.objects.create(user=self.user, name='Breakfast'),
+        Tag.objects.create(user=self.user, name='Dessert')
+
+        tags = Tag.objects.all().order_by('-name').distinct()
+
+        res = self.client.get(TAGS_URL, {'format': 'xlsx', 'filename': 'testfile'})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.headers['Content-Disposition'], 'attachment; filename=testfile.xlsx')
+        self.assertEqual(res.headers['Content-Type'], 'application/xlsx; charset=utf-8')
+
+        for tag, row in zip(tags, res.data):
+            for k, v in row.items():
+                self.assertEqual(getattr(tag, k), v)
