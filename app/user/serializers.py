@@ -33,6 +33,13 @@ class UserSerializer(serializers.ModelSerializer):
 
 class AuthTokenSerializer(serializers.Serializer):
     """Serializer for the user auth token."""
+
+    def update(self, instance, validated_data):
+        return super().update(instance, validated_data)
+
+    def create(self, validated_data):
+        return super().create(validated_data)
+
     email = serializers.EmailField()
     password = serializers.CharField(
         style={'input_type': 'password'},
