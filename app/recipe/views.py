@@ -9,6 +9,8 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.settings import api_settings
+from rest_framework_csv.renderers import CSVRenderer
 
 from core.models import Recipe, Tag, Ingredient
 from recipe import serializers
@@ -91,6 +93,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 'assigned_only',
                 OpenApiTypes.INT, enum=[0, 1],
                 description='Filter by items assigned to recipes.',
+            ),
+            OpenApiParameter(
+                'filename',
+                OpenApiTypes.STR,
+                description='Filename for attachments.'
             )
         ]
     )
@@ -103,6 +110,7 @@ class BaseRecipeAttrViewSet(mixins.DestroyModelMixin,
     """Base ViewSet for recipe attributes."""
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
+    renderer_classes = [*api_settings.DEFAULT_RENDERER_CLASSES, CSVRenderer]
 
     def perform_create(self, serializer):
         """Create a new model instance with user from request."""
@@ -117,6 +125,19 @@ class BaseRecipeAttrViewSet(mixins.DestroyModelMixin,
             queryset = queryset.filter(recipe__isnull=False)
 
         return queryset.filter(user=self.request.user).order_by('-name').distinct()
+
+    def list(self, request, *args, **kwargs):
+        response = super(BaseRecipeAttrViewSet, self).list(request, *args, **kwargs)
+
+        if request.query_params.get('format') == 'csv':
+            response['Content-Disposition'] = f'attachment; filename={self.get_filename()}'
+
+        return response
+
+    def get_filename(self):
+        extension = self.request.query_params.get('format')
+        name = self.request.query_params.get('filename', 'file')
+        return f'{name}.{extension}'
 
 
 class TagViewSet(BaseRecipeAttrViewSet):

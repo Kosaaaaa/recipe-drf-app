@@ -104,3 +104,19 @@ class PrivateTagsApiTests(TestCase):
         for k, v in payload.items():
             self.assertEqual(getattr(tag, k), v)
         self.assertEqual(tag.user, self.user)
+
+    def test_list_tag_csv(self):
+
+        Tag.objects.create(user=self.user, name='Breakfast'),
+        Tag.objects.create(user=self.user, name='Dessert')
+
+        tags = Tag.objects.all().order_by('-name').distinct()
+
+        res = self.client.get(TAGS_URL, {'format': 'csv', 'filename': 'testfile'})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.headers['Content-Disposition'], 'attachment; filename=testfile.csv')
+        self.assertEqual(res.headers['Content-Type'], 'text/csv; charset=utf-8')
+
+        for tag, row in zip(tags, res.data):
+            for k, v in row.items():
+                self.assertEqual(getattr(tag, k), v)

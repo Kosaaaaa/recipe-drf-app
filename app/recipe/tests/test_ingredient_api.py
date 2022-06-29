@@ -147,3 +147,19 @@ class PrivateIngredientsApiTests(TestCase):
         for k, v in payload.items():
             self.assertEqual(getattr(ingredient, k), v)
         self.assertEqual(ingredient.user, self.user)
+
+    def test_list_tag_csv(self):
+
+        Ingredient.objects.create(user=self.user, name='Eggs'),
+        Ingredient.objects.create(user=self.user, name='Milk')
+
+        ingredients = Ingredient.objects.all().order_by('-name').distinct()
+
+        res = self.client.get(INGREDIENTS_URL, {'format': 'csv', 'filename': 'testfile'})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.headers['Content-Disposition'], 'attachment; filename=testfile.csv')
+        self.assertEqual(res.headers['Content-Type'], 'text/csv; charset=utf-8')
+
+        for ingredient, row in zip(ingredients, res.data):
+            for k, v in row.items():
+                self.assertEqual(getattr(ingredient, k), v)
