@@ -46,4 +46,3 @@ class CalcTests(SimpleTestCase):
 
         for x, res in correct_results:
             self.assertEqual(calc.factorial(x), res)
-
