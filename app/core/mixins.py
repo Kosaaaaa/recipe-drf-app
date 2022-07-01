@@ -1,3 +1,5 @@
+import logging
+
 from django.contrib.admin.models import LogEntry, ADDITION, CHANGE, ContentType, DELETION
 from django.utils.translation import gettext as _
 
@@ -6,6 +8,18 @@ OPERATION_MESSAGE_MAP = {
     CHANGE: _('Updated'),
     DELETION: _('Deleted'),
 }
+
+ACTIONS_LEVEL_MAP = {
+    1: logging.DEBUG,
+    2: logging.DEBUG,
+    3: logging.DEBUG,
+    10: logging.INFO,
+    20: logging.WARNING,
+    30: logging.ERROR,
+    40: logging.CRITICAL
+}
+
+_logger = logging.getLogger(__name__)
 
 
 class LoggingMethodMixin:
@@ -16,15 +30,20 @@ class LoggingMethodMixin:
 
     def log(self, operation, instance):
         action_message = OPERATION_MESSAGE_MAP[operation]
+        object_repr = str(instance)
+        message = f'{action_message} {instance}'
+        content_type_id = ContentType.objects.get_for_model(instance).pk
 
         # noinspection PyUnresolvedReferences
         LogEntry.objects.log_action(
             user_id=self.request.user.id,
-            content_type_id=ContentType.objects.get_for_model(instance).pk,
+            content_type_id=content_type_id,
             object_id=instance.pk,
-            object_repr=str(instance),
+            object_repr=object_repr,
             action_flag=operation,
-            change_message=f'{action_message} {instance}')
+            change_message=message)
+
+        _logger.log(ACTIONS_LEVEL_MAP[operation], f'#{content_type_id} - {object_repr}: {message}')
 
     def _log_on_create(self, serializer):
         """Log the up-to-date serializer.data."""
