@@ -12,6 +12,7 @@ from core import views as core_views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/health-check/', core_views.health_check, name='health-check'),
+    path('api/factorial/<int:n>/', core_views.factorial_view, name='factorial'),
     path('api/user/', include('user.urls')),
     path('api/recipe/', include('recipe.urls')),
 ]

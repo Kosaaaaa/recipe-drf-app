@@ -1,4 +1,5 @@
 from django.test import SimpleTestCase
+
 from app import calc
 
 
@@ -34,3 +35,15 @@ class CalcTests(SimpleTestCase):
         res = calc.subtract(9.99, 3)
 
         self.assertAlmostEqual(res, 6.99)
+
+    def test_factorial(self):
+        correct_results = [
+            (1, 1),
+            (5, 120),
+            (6, 720),
+            (10, 3_628_800),
+        ]
+
+        for x, res in correct_results:
+            self.assertEqual(calc.factorial(x), res)
+
