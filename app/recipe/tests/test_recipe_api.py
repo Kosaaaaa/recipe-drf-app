@@ -1,11 +1,12 @@
 """
 Tests for recipe APIs.
 """
-from decimal import Decimal
-import tempfile
 import os
-from PIL import Image
+import tempfile
+from decimal import Decimal
 
+from PIL import Image
+from django.contrib.admin.models import LogEntry, ADDITION, CHANGE, DELETION
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
@@ -379,6 +380,60 @@ class PrivateRecipeApiTests(TestCase):
         self.assertIn(s1.data, res.data)
         self.assertIn(s2.data, res.data)
         self.assertNotIn(s3.data, res.data)
+
+    def test_create_recipe_logentry(self):
+        """Test creating a recipe with valid ADDITION LogEntry."""
+        payload = {
+            'title': 'Sample recipe LogEntry',
+            'time_minutes': 30,
+            'price': Decimal('5.99'),
+        }
+        res = self.client.post(RECIPES_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        recipe = Recipe.objects.get(id=res.data['id'])
+        entry = LogEntry.objects.filter(
+            object_repr=str(recipe),
+            object_id=recipe.pk,
+            user=self.user,
+            action_flag=ADDITION,
+        ).exists()
+        self.assertTrue(entry)
+
+    def test_delete_recipe_logentry(self):
+        """Test deleting a recipe successful with valid DELETION LogEntry."""
+        recipe = create_recipe(user=self.user)
+
+        url = detail_url(recipe.id)
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+
+        entry = LogEntry.objects.filter(
+            object_repr=str(recipe),
+            object_id=recipe.pk,
+            user=self.user,
+            action_flag=DELETION,
+        ).exists()
+        self.assertTrue(entry)
+
+    def test_partial_update_logentry(self):
+        """Test partial update of a recipe with valid CHANGE LogEntry."""
+        recipe = create_recipe(user=self.user)
+
+        payload = {'title': 'New recipe title'}
+        url = detail_url(recipe.id)
+        res = self.client.patch(url, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        recipe.refresh_from_db()
+        entry = LogEntry.objects.filter(
+            object_repr=str(recipe),
+            object_id=recipe.pk,
+            user=self.user,
+            action_flag=CHANGE,
+        ).exists()
+        self.assertTrue(entry)
 
 
 class ImageUploadTests(TestCase):
