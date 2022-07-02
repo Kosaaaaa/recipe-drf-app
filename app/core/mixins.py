@@ -28,7 +28,7 @@ class LoggingMethodMixin:
     To use this, subclass it and ModelViewSet.
     """
 
-    def log(self, operation, instance):
+    def log(self, operation: int, instance):
         action_message = OPERATION_MESSAGE_MAP[operation]
         object_repr = str(instance)
         message = f'{action_message} {instance}'

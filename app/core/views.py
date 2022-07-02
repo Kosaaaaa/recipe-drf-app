@@ -15,5 +15,5 @@ def health_check(request):
 
 @api_view(['GET'])
 @throttle_classes([UserRateThrottle, AnonRateThrottle])
-def factorial_view(request, n):
+def factorial_view(request, n: int):
     return Response(data={'result': factorial(n)})
